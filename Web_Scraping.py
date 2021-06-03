@@ -1,23 +1,29 @@
 import re
 import ssl
-
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import bs4
 import metadata_parser
+import random
+import xlsxwriter
 
 DEFAULT_TIMEOUT = 100
 
-#pg = requests.get("https://gitconnected.com/learn/python")
-#print(pg.status_code)
 
-#soup = BeautifulSoup(pg.content, 'html.parser')
+topics = ['statistics', 'machine learning', 'data analytics', 'image analysis', 'regression', 'classification','database','visualization','data science','natural language processing','computer vision','image generation','robotics']
 
-#print(soup.find("title").string)
-#print(soup.find("meta", attrs={"name":'description'})['content'])
-#print(soup.find("meta", attrs={"name":'keywords'})['content'])
-#for a in soup.find_all('a', href=True):
-#    print(a["href"])
+subsection = ['course','training','guide','tutorial','instruction']
+
+language = ['python','java','matlab','R','C','C++','Julia','Labview','SAS','COMSOL']
+
+
+
+def searchtermcombo():
+    lan=random.choice(language)
+    top=random.choice(topics)
+    sub=random.choice(subsection)
+    return (top,lan,sub)
 
 
 def title(soup):
@@ -28,12 +34,12 @@ def title(soup):
 
 
 def learningtypes(soup):
-    return
+    return "Null"
 
 
 def datatopics(s):
     topics=[]
-    return
+    return "Null"
 
 
 def description(soup):
@@ -53,59 +59,66 @@ def keywords(soup):
 
 
 def cost(soup):
-        print(re.findall("\$[\d,]*\.\d\d", soup.prettify()))
-        return re.findall("\$[\d,]*\.\d\d", soup.prettify())
+    # print(re.findall("\$[\d,]*\.\d\d", soup.prettify()))
+    moneyarray = re.findall("\$[\d,]*\.\d\d", soup.prettify())
+    finalarray = set(moneyarray)
+    print(list(finalarray))
+    return list(finalarray)
 
 
 def vendor(soup):
-    return
+    return "Null"
 
 
 def publicdod(soup):
-    return
+    return "Null"
 
 
 def timecom(soup):
-    return
+    return "Null"
 
 
 def certificate(soup):
-    return
+    return "Null"
 
 
-def language(soup):
-    return
+def languagetype(soup):
+    languages = ['Python', 'Java', 'Matlab', 'R', 'C', 'C++', 'Julia', 'LabVIEW', 'SAS', 'COMSOL']
+    for L in languages:
+        if L in searchterm or L in title(soup):
+            return L
+        else:
+            return "Null"
 
 
 def operations(soup):
-    return
+    return "Null"
 
 
 def barrier(soup):
-    return
+    return "Null"
 
 
 def selfinstructor(soup):
-    return
+    return "Null"
 
 
 def learningtype(soup):
-    return
+    return "Null"
 
 
 def inpersonremote(soup):
-    return
+    return "Null"
 
 
 
 def useful(soup):
-
-    return
+    return "Null"
 
 
 def main(a):
     bigarray = []
-    for website in a:
+    for website in a[0]:
         array = []
         try:
             print("starting to scrape", website)
@@ -119,8 +132,10 @@ def main(a):
             array.append(publicdod(soup))
             array.append(timecom(soup))
             array.append(certificate(soup))
-            array.append(datatopics(soup))
-            array.append(language(soup))
+            # array.append(datatopics(soup,a[1]))
+            array.append(a[1])
+            array.append(a[2])
+            # array.append(languagetype(soup,a[2]))
             array.append(operations(soup))
             array.append(barrier(soup))
             array.append(selfinstructor(soup))
@@ -135,59 +150,53 @@ def main(a):
             print("\n----------ERROR SSL ERROR----------\n")
         except requests.exceptions.ReadTimeout:
             print("\n----------ERROR TIME OUT ERROR----------\n")
+        except requests.exceptions.ConnectionError:
+            print("\n----------ERROR CONNECTION ERROR----------\n")
+        except TypeError:
+            print("\n----------ERROR UNABLE TO READ ERROR----------\n")
     return bigarray
 
 
-def youtube(a):
-    search = a
+
+
+def google():
+    tuplesearch=searchtermcombo()
+    search = '%s %s %s' % (tuplesearch[0],tuplesearch[1],tuplesearch[2])
+    print("search terms are:", search)
     x = 0
     urlarrays = []
     while x <= 100:
-        url = f"https://www.youtube.com/results?search_query={search}"
-        req = requests.get(url)
-        soup = bs4.BeautifulSoup(req.text,
-                                 "html.parser")
-        heading_object = soup.find_all('a', href=True)
-        for info in heading_object:
-            url = info["href"]
-            if "https" in url:
-                urlstart = url.find("h")
-                urlend = url.find("&sa")
-                url = url[urlstart:urlend]
-                if "google" not in url:
-                    if url not in urlarrays:
-                        urlarrays.append(url)
-        x += 10
-    return urlarrays
-
-
-def google(a):
-    search = a
-    x = 0
-    urlarrays = []
-    while x <= 10:
         url = f"https://www.google.com/search?&q={search}&start=" + str(x)
         req = requests.get(url)
         soup = bs4.BeautifulSoup(req.text,
                                  "html.parser")
         heading_object = soup.find_all('a', href=True)
+        blacklist = ['google','reddit','facebook','pdf']
         for info in heading_object:
             url = info["href"]
             if "https" in url:
                 urlstart = url.find("h")
                 urlend = url.find("&sa")
                 url = url[urlstart:urlend]
-                if "google" not in url:
+                #if blacklist not in url:
+                if any(word in url for word in blacklist):
+                    print("Blacklist hit")
+                else:
                     if url not in urlarrays:
                         urlarrays.append(url)
         x += 10
     print("done googling!!!")
-    return urlarrays
+    return urlarrays,tuplesearch[0],tuplesearch[1]
 
+
+def sendtospreadsheet(a):
+    df = pd.DataFrame(a)
+    writer = pd.ExcelWriter('demo.xlsx', engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1', index=True)
+    writer.save()
 
 def test(a):
     try:
-        req=requests.get(a)
         soup = bs4.BeautifulSoup(requests.get(a).text, "html.parser")
         print(soup.prettify())
        #print(re.findall("\$\d*\.\d\d", soup.prettify()))
@@ -198,7 +207,9 @@ def test(a):
 
 
 if __name__ == '__main__':
-    print(main(google("Python Data Analysis Courses")))
+    array = main(google())
+    #print(array)
+    sendtospreadsheet(array)
     #page= metadata_parser.MetadataParser('https://www.coursera.org/learn/python')
     #print(page.metadata)
 
