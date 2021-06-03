@@ -1,6 +1,6 @@
 import requests
-from bs4 import BeautifulSoup
 import bs4
+
 
 def gitconnected(a):
     search = a
@@ -18,7 +18,7 @@ def gitconnected(a):
             print('starting scraping ' + url2)
             req2 = requests.get(url2)
             soup2 = bs4.BeautifulSoup(req2.text, "html.parser")
-            tags = soup2.find_all('span', attrs={'class':'tutorial-tag'})
+            tags = soup2.find_all('span', attrs={'class': 'tutorial-tag'})
             for i in range(len(tags)):
                 tags[i] = tags[i].string
             urlarrays.append(tags)
@@ -35,6 +35,6 @@ def gitconnected(a):
 
     return urlbigarrays
 
+
 if __name__ == '__main__':
     print(gitconnected("python"))
-
