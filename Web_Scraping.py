@@ -37,10 +37,18 @@ def learningtypes(soup):
     return "Null"
 
 
-def datatopics(s):
-    topics=[]
-    return "Null"
-
+def datatopics(soup, topicsearched):
+    topics = ['statistics', 'stat', 'machine learning', 'data analytics', 'image analysis', 'regression', 'classification','database','visualization','data science','natural language processing','computer vision','image generation','robotics']
+    topicsused = "Null"
+    for T in topics:
+        if T in title(soup):
+            topicsused = T
+    if topicsused == topicsearched:
+        return topicsearched
+    if topicsused == "Null":
+        return "Null"
+    if topicsused != "Null":
+        return topicsused
 
 def description(soup):
     try:
@@ -82,13 +90,18 @@ def certificate(soup):
     return "Null"
 
 
-def languagetype(soup):
-    languages = ['Python', 'Java', 'Matlab', 'R', 'C', 'C++', 'Julia', 'LabVIEW', 'SAS', 'COMSOL']
+def languagetype(soup, languagesearched):
+    languages = ['Python', 'Java', 'Matlab', 'R ', 'C ', 'C++ ', 'Julia', 'Labview', 'SAS', 'COMSOL']
+    languageused = "Null"
     for L in languages:
-        if L in searchterm or L in title(soup):
-            return L
-        else:
-            return "Null"
+        if L in title(soup):
+            languageused = L
+    if languageused == languagesearched:
+        return languagesearched
+    if languageused == "Null":
+        return "Null"
+    if languageused != "Null":
+        return languageused
 
 
 def operations(soup):
@@ -132,10 +145,10 @@ def main(a):
             array.append(publicdod(soup))
             array.append(timecom(soup))
             array.append(certificate(soup))
-            # array.append(datatopics(soup,a[1]))
-            array.append(a[1])
-            array.append(a[2])
-            # array.append(languagetype(soup,a[2]))
+            array.append(datatopics(soup, a[1]))
+            #array.append(a[1])
+            #array.append(a[2])
+            array.append(languagetype(soup, a[2]))
             array.append(operations(soup))
             array.append(barrier(soup))
             array.append(selfinstructor(soup))
@@ -205,7 +218,27 @@ def test(a):
     except requests.exceptions.MissingSchema:
         print("USnews?????")
 
+        
+def linklistspredsheet():
+    x = 0
+    array = []
+    while x < 10:
+        test = google()
+        urllist = test[0]
+        searchterms = str(test[1] + ' ' + test[2])
+        array.append(str(x) + ' ' + searchterms)
+        for url in urllist:
+            beg = url.find('://')
+            url = url[beg + 3:]
+            print(url)
+            end = url.find('/')
+            url = url[:end]
+            array.append(url)
+        x += 1
+    array.sort()
+    sendtospreadsheet(array)
 
+    
 if __name__ == '__main__':
     array = main(google())
     #print(array)
