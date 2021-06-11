@@ -40,20 +40,29 @@ def get_tc():
 def get_cert():
     return 'No'
 
-def get_topic():
-    return 'Tutorial'
+def get_topic(search):
+    # if search == 'data-structures-algorithms':
+    #     return 'Tutorial, Data Structures'
+    # elif search == 'artificial-intelligence-ai':
+    #     return 'Tutorial, Artificial Intelligence'
+    # else:
+    return 'Tutorial, Cloud Services'
 
 def get_language(search):
-    if search == 'c-plus-plus':
-        return 'C++'
-    elif search == 'html-5':
-        return 'HTML'
-    elif search == 'c-sharp':
-        return 'C#'
-    elif search == 'linux-system-administration':
-        return 'Linux'
-    else:
-        return search.capitalize()
+    # if search == 'c-plus-plus':
+    #     return 'C++'
+    # elif search == 'html-5':
+    #     return 'HTML'
+    # elif search == 'c-sharp':
+    #     return 'C#'
+    # elif search == 'linux-system-administration':
+    #     return 'Linux'
+    # elif search == 'assembly-language':
+    #     return "Assembly"
+    # elif search in ['data-structures-algorithms','artificial-intelligence-ai']:
+    return ' '
+    # else:
+    #    return search.capitalize()
 
 def get_bos():
     return 'Remote'
@@ -78,7 +87,12 @@ def get_learning_type(soup2):
         if tags[i] in searchlist:
             finaltag.append(tags[i])
 
-    return finaltag
+    if len(finaltag) == 0:
+        return ' '
+    elif len(finaltag) == 1:
+        return f'{finaltag[0]}'
+    elif len(finaltag) == 2:
+        return f'{finaltag[0]},{finaltag[1]}'
 
 def get_remote():
     return 'Remote'
@@ -119,7 +133,7 @@ def gitconnected(a):
                 urlarrays.append(get_clear())
                 urlarrays.append(get_tc())
                 urlarrays.append(get_cert())
-                urlarrays.append(get_topic())
+                urlarrays.append(get_topic(search))
                 urlarrays.append(get_language(search))
                 urlarrays.append(get_bos())
                 urlarrays.append(get_level(soup2))
@@ -141,12 +155,15 @@ def gitconnected(a):
 
 def sendtospreadsheet(a):
     df = pd.DataFrame(a)
-    writer = pd.ExcelWriter(f'gitconnected.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter('gitconnected.xlsx', engine='xlsxwriter')
     df.to_excel(writer, sheet_name='Sheet1', index=True)
     writer.save()
 
 if __name__ == '__main__':
-    search = ['python','matlab','c-plus-plus','r','ruby','julia','java','c','javascript','html-5','c-sharp','linux-system-administration']
+    # search = ['python','matlab','c-plus-plus','r','ruby','julia','java','c','javascript','html-5','c-sharp',\
+    #           'linux-system-administration','arduino','assembly-language','data-structures-algorithms',\
+    #           'artificial-intelligence-ai']
+    search = ['amazon-web-services-aws']
     source = gitconnected(search)
     sendtospreadsheet(source)
 
